@@ -5,7 +5,7 @@ import attr
 from .serializer import RouteSpec, RouteField
 
 
-metadata_aliases = ["description"]
+metadata_aliases = ["description", "unique", "min_items", "max_items"]
 
 
 def field(*args, **kwargs):
