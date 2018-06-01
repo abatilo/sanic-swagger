@@ -5,7 +5,30 @@ import attr
 from .serializer import RouteSpec, RouteField
 
 
-metadata_aliases = ["description", "unique", "min_items", "max_items"]
+metadata_aliases = [
+    "description",
+    "unique",
+    "min_items",
+    "max_items",
+    "format",
+]
+# metadata_aliases = {
+#     "all": [
+#         "description"
+#     ],
+#     "string": [
+#         "format"
+#     ],
+#     "array": [
+#         "min_items",
+#         "max_itens",
+#         "unique"
+#     ],
+#     "object": [
+#         "minProperties",
+#         "maxProperties"
+#     ]
+# }
 
 
 def field(*args, **kwargs):
@@ -19,13 +42,12 @@ def field(*args, **kwargs):
     return attr.ib(*args, **kwargs)
 
 
-class _ModelMeta(type):
-
+class ModelMeta(type):
     def __new__(mcls, name, bases, attrs):
         return attr.s(super().__new__(mcls, name, bases, attrs))
 
 
-class Model(metaclass=_ModelMeta):
+class Model(metaclass=ModelMeta):
     pass
 
 
@@ -42,7 +64,6 @@ def route(
     produces_content_type=None,
     exclude=None,
 ):
-
     def inner(func):
         route_spec = route_specs[func]
 
@@ -67,7 +88,6 @@ def route(
 
 
 def exclude(boolean):
-
     def inner(func):
         route_specs[func].exclude = boolean
         return func
@@ -76,7 +96,6 @@ def exclude(boolean):
 
 
 def summary(text):
-
     def inner(func):
         route_specs[func].summary = text
         return func
@@ -85,7 +104,6 @@ def summary(text):
 
 
 def description(text):
-
     def inner(func):
         route_specs[func].description = text
         return func
@@ -94,7 +112,6 @@ def description(text):
 
 
 def consumes(*args, content_type=None, location="query", required=False):
-
     def inner(func):
         if args:
             for arg in args:
@@ -107,7 +124,6 @@ def consumes(*args, content_type=None, location="query", required=False):
 
 
 def produces(*args, content_type=None):
-
     def inner(func):
         if args:
             field = RouteField(args[0])
@@ -119,7 +135,6 @@ def produces(*args, content_type=None):
 
 
 def tag(name):
-
     def inner(func):
         route_specs[func].tags.append(name)
         return func
@@ -128,7 +143,6 @@ def tag(name):
 
 
 def response(code, description=None, examples=None, model=None):
-
     def inner(func):
         route_specs[func].responses[code] = {
             "description": description,

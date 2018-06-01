@@ -39,20 +39,22 @@ def build_spec(app, loop):
     }
     _spec["schemes"] = getattr(app.config, "API_SCHEMES", ["http"])
 
-    host = getattr(app.config, 'API_HOST', None)
+    host = getattr(app.config, "API_HOST", None)
     if host is not None:
-        _spec['host'] = host
+        _spec["host"] = host
 
-    base_path = getattr(app.config, 'API_BASEPATH', None)
+    base_path = getattr(app.config, "API_BASEPATH", None)
     if base_path is not None:
-        _spec['basePath'] = base_path
+        _spec["basePath"] = base_path
 
     # --------------------------------------------------------------- #
     # Authorization
     # --------------------------------------------------------------- #
 
-    _spec['securityDefinitions'] = getattr(app.config, 'API_SECURITY_DEFINITIONS', None)
-    _spec['security'] = getattr(app.config, 'API_SECURITY', None)
+    _spec["securityDefinitions"] = getattr(
+        app.config, "API_SECURITY_DEFINITIONS", None
+    )
+    _spec["security"] = getattr(app.config, "API_SECURITY", None)
 
     # --------------------------------------------------------------- #
     # Blueprint Tags
@@ -61,7 +63,7 @@ def build_spec(app, loop):
     for blueprint in app.blueprints.values():
         if hasattr(blueprint, "routes"):
             for route in blueprint.routes:
-                if hasattr(route.handler, 'view_class'):
+                if hasattr(route.handler, "view_class"):
                     # class based view
                     view = route.handler.view_class
                     for http_method in HTTP_METHODS:
@@ -102,7 +104,7 @@ def build_spec(app, loop):
         methods = {}
         for _method, _handler in method_handlers:
             # route_spec = route_specs.get(_handler) or RouteSpec()
-            if hasattr(_handler, 'view_class'):
+            if hasattr(_handler, "view_class"):
                 view_handler = getattr(_handler.view_class, _method.lower())
                 route_spec = route_specs.get(view_handler) or RouteSpec()
             else:
