@@ -1,8 +1,10 @@
-# Sanic OpenAPI
+# [Sanic](https://github.com/channelcat/sanic) + [attrs](http://www.attrs.org/) towards [OpenAPI 3.0](https://swagger.io/docs/specification/about/)
 
-[![Build Status](https://travis-ci.org/channelcat/sanic-openapi.svg?branch=master)](https://travis-ci.org/channelcat/sanic-openapi)
-[![PyPI](https://img.shields.io/pypi/v/sanic-openapi.svg)](https://pypi.python.org/pypi/sanic-openapi/)
-[![PyPI](https://img.shields.io/pypi/pyversions/sanic-openapi.svg)](https://pypi.python.org/pypi/sanic-openapi/)
+**Note**: This is a fork of Sanic OpenAPI implementation from [@channelcat](https://github.com/channelcat), which I like a lot but it lacks some of the functionality I wanted (and I also went sideways by using a third-party lib ([`attrs`](http://www.attrs.org/)) as default for modeling your classes).
+
+[![Build Status](https://travis-ci.org/vltr/sanic-attrs.svg?branch=master)](https://travis-ci.org/vltr/sanic-attrs)
+[![PyPI](https://img.shields.io/pypi/v/sanic-attrs.svg)](https://pypi.python.org/pypi/sanic-attrs/)
+[![PyPI](https://img.shields.io/pypi/pyversions/sanic-attrs.svg)](https://pypi.python.org/pypi/sanic-attrs/)
 
 Give your Sanic API a UI and OpenAPI documentation, all for the price of free!
 
@@ -11,20 +13,45 @@ Give your Sanic API a UI and OpenAPI documentation, all for the price of free!
 ## Installation
 
 ```shell
-pip install sanic-openapi
+pip install sanic-attrs
 ```
 
 Add OpenAPI and Swagger UI:
 
 ```python
-from sanic_openapi import swagger_blueprint, openapi_blueprint
+from sanic_attrs import swagger_blueprint, openapi_blueprint
 
 app.blueprint(openapi_blueprint)
 app.blueprint(swagger_blueprint)
 ```
 
-You'll now have a Swagger UI at the URL `/swagger`.  
-Your routes will be automatically categorized by their blueprints.
+You'll now have a Swagger UI at the URL `/swagger`. Your routes will be automatically categorized by their blueprints. This is the default usage, but more advanced usage can be seen. Keep reading!
+
+## [typing](https://docs.python.org/3/library/typing.html)
+
+Since `sanic-attrs` is, of course, based on `attrs` and the Python target version is 3.5+, most of the typing definitions for your model will be made entirely using Python types, either global ones or from the `typing` library. Also, `enums` are supported as well :smiley:
+
+Here's the types supported (so far):
+
+- `int`
+- `float`
+- `str`
+- `bool`
+- `date`
+- `datetime`
+- `bytes`
+- `typing.Any`
+- `typing.Collection`
+- `typing.Dict`
+- `typing.Iterable`
+- `typing.List`
+- `typing.Mapping`
+- `typing.Optional`
+- `typing.Sequence`
+- `typing.Set`
+- `typing.Union`
+
+**A note on `list` and `dict`**: Please, use `typing.List` and `typing.Dict` for this.
 
 ## Example
 
@@ -35,7 +62,7 @@ For an example Swagger UI, see the [Pet Store](http://petstore.swagger.io/)
 ### Use simple decorators to document routes:
 
 ```python
-from sanic_openapi import doc
+from sanic_attrs import doc
 
 @app.get("/user/<user_id:int>")
 @doc.summary("Fetches a user by ID")
@@ -52,15 +79,23 @@ async def create_user(request):
 
 ### Model your input/output
 
-```python
-class Car:
-    make = str
-    model = str
-    year = int
+Yes, in this version you **need** to be descriptive :wink:
 
-class Garage:
-    spaces = int
-    cars = [Car]
+```python
+import typing
+from sanic_attrs import doc
+
+
+class Car(doc.Model):
+    make: str = doc.field(description="Who made the car")
+    model: str = doc.field(description="Type of car. This will vary by make")
+    year: int = doc.field(description="4-digit year of the car", required=False)
+
+
+class Garage(doc.Model):
+    spaces: int = doc.field(description="How many cars can fit in the garage")
+    cars: typing.List[Car] = doc.field(description="All cars in the garage")
+
 
 @app.get("/garage")
 @doc.summary("Gets the whole garage")
@@ -73,18 +108,70 @@ async def get_garage(request):
 
 ```
 
-### Get more descriptive
+### Advanced usage
+
+Since `doc.Model` and `doc.field` are nothing more as syntatic sugar for the `@attr.s` decorator and `attr.ib` function, you can express your models using these provided classes and methods or use vanilla `attr` in your models. Here's a complex example that shows a mixed model:
 
 ```python
-class Car:
-    make = doc.String("Who made the car")
-    model = doc.String("Type of car.  This will vary by make")
-    year = doc.Integer("4-digit year of the car", required=False)
+from enum import Enum, IntEnum
+from typing import (Any, Collection, Dict, Iterable, List, Mapping, Optional,
+                    Sequence, Set, Union)
 
-class Garage:
-    spaces = doc.Integer("How many cars can fit in the garage")
-    cars = doc.List(Car, description="All cars in the garage")
+import attr
+
+from sanic_attrs import doc
+
+
+class PlatformEnum(str, Enum):
+    XBOX1 = "XBOX1"
+    PLAYSTATION4 = "PLAYSTATION4"
+    PC = "PC"
+
+
+class LanguageEnum(IntEnum):
+    ENGLISH = 1
+    JAPANESE = 2
+    SPANISH = 3
+    GERMAN = 4
+    PORTUGUESE = 5
+
+
+class Something(doc.Model):
+    some_name: str = doc.field(description="Something name")
+
+
+@attr.s
+class AnotherSomething:
+    another_name: str = attr.ib(metadata={"description": "Another field"})
+
+
+class Game(doc.Model):
+    name: str = doc.field(description="The name of the game")
+    platform: PlatformEnum = doc.field(description="Which platform it runs on")
+    score: float = doc.field(description="The average score of the game")
+    resolution_tested: str = doc.field(description="The resolution which the game was tested")
+    genre: List[str] = doc.field(description="One or more genres this game is part of")
+    genre_extra: Sequence[str] = doc.field(description="One or more genres this game is part of")
+    rating: Dict[str, float] = doc.field(description="Ratings given on each country")
+    rating_outside: Mapping[str, float] = doc.field(description="Ratings given on each country")
+    screenshots: Set[bytes] = doc.field(description="Screenshots of the game")
+    screenshots_extra: Collection[bytes] = doc.field(description="Screenshots of the game")
+    players: Iterable[str] = doc.field(description="Some of the notorious players of this game")
+    review_link: Optional[str] = doc.field(description="The link of the game review (if exists)")
+    junk: Union[str, bytes] = doc.field(description="This should be strange")
+    more_junk: Any = doc.field(description="The more junk field")
+    language: LanguageEnum = doc.field(description="The language of the game")
+    something: List[Something] = doc.field(description="Something to go along the game")
+    another: AnotherSomething = doc.field(description="Another something to go along the game")
 ```
+
+### Enabling on-the-fly input model validation
+
+TODO.
+
+### Enabling on-the-fly output model serialization
+
+TODO.
 
 ### Configure all the things
 
@@ -96,3 +183,74 @@ app.config.API_TERMS_OF_SERVICE = 'Use with caution!'
 app.config.API_PRODUCES_CONTENT_TYPES = ['application/json']
 app.config.API_CONTACT_EMAIL = 'channelcat@gmail.com'
 ```
+
+### Types not avaiable
+
+These are the types not available from [`typing`](https://docs.python.org/3/library/typing.html) in the current version:
+
+- `AbstractSet  # would be like set?`
+- `AnyStr  # this is mostly like Optional[str] or just str`
+- `AsyncContextManager  # not a variable I think`
+- `AsyncGenerator  # not a variable I think`
+- `AsyncIterable  # not a variable I think`
+- `AsyncIterator  # not a variable I think`
+- `Awaitable  # not a variable I think`
+- `BinaryIO  # hmmm, I don't know ...`
+- `ByteString  # could be like bytes, for openapi is {"type":"string", "format": "byte"}`
+- `CT_co  # wtf is this?`
+- `Callable  # not a variable`
+- `CallableMeta  # not a variable`
+- `ChainMap  # not a variable`
+- `ClassVar  # generic ...`
+- `Container  # generic`
+- `ContextManager  # not a variable`
+- `Coroutine  # not a variable`
+- `Counter  # not a variable`
+- `DefaultDict  # perhaps like dict?`
+- `Deque  # like List ?`
+- `FrozenSet  # a "view-only list?`
+- `Generator  # not a variable`
+- `Generic  # no way - or Any?`
+- `Hashable  # a hashmap?`
+- `IO  # hmmm, from docs: "Generic base class for TextIO and BinaryIO.", so ...`
+- `ItemsView  # what is an Item? it inherits from AbstractSet ... from docs: "A set is a finite, iterable container."`
+- `Iterator  # not a variable`
+- `KT  # generics`
+- `KeysView  # dict "readonly" ?`
+- `MappingView  # dict "readonly" ?`
+- `Match  # generic (I think)`
+- `MethodDescriptorType  # not a variable`
+- `MethodWrapperType  # not a variable`
+- `MutableMapping  # base class of Mapping, docs: "Abstract base class for generic types."`
+- `MutableSequence  # same as above, but for Sequence`
+- `MutableSet  # same as above, but for Set`
+- `NamedTuple  # what to do here? NamedTuple is just an object with variables that can be *anything* I guess ...`
+- `NamedTupleMeta  # baseclass of NamedTuple`
+- `NewType  # not a variable`
+- `NoReturn  # not a variable`
+- `Pattern  # generic`
+- `Reversible  # generic (Iterable)`
+- `Sized  # generic`
+- `SupportsAbs  # not a variable`
+- `SupportsBytes  # not a variable`
+- `SupportsComplex  # not a variable`
+- `SupportsFloat  # not a variable`
+- `SupportsInt  # not a variable`
+- `SupportsRound  # not a variable`
+- `T  # generic`
+- `TYPE_CHECKING  # ???`
+- `T_co  # ???`
+- `T_contra  # ???`
+- `Text  # returns a str object if created, so I'll stick with str or map it too?`
+- `TextIO  # buffer, like bytes ... map it?`
+- `Tuple  # well ... Tuple like lists or Tuple like Tuple[int, str, float] ?`
+- `TupleMeta  # baseclass of Tuple`
+- `Type  # generics`
+- `TypeVar  # generics`
+- `TypingMeta  # generics`
+
+If there's anything missing or required, please fill in a issue or contribute with a PR. PR's are most welcome :smiley:
+
+## License
+
+MIT, the same as [`sanic-openapi`](https://github.com/channelcat/sanic-openapi/blob/ffe8a5c7443810f1dfe65ad7dd1991e776931dc1/LICENSE).

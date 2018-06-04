@@ -2,43 +2,18 @@ from collections import defaultdict
 
 import attr
 
-from .serializer import RouteSpec, RouteField
-
-
-metadata_aliases = [
-    "description",
-    "unique",
-    "min_items",
-    "max_items",
-    "format",
-]
-# metadata_aliases = {
-#     "all": [
-#         "description"
-#     ],
-#     "string": [
-#         "format"
-#     ],
-#     "array": [
-#         "min_items",
-#         "max_itens",
-#         "unique"
-#     ],
-#     "object": [
-#         "minProperties",
-#         "maxProperties"
-#     ]
-# }
+from .options import metadata_aliases
 
 
 def field(*args, **kwargs):
-    for alias in metadata_aliases:
-        value = kwargs.pop(alias, None)
-        if value is not None:
-            if kwargs.get("metadata", None) is None:
-                kwargs.update({"metadata": {alias: value}})
-            else:
-                kwargs["metadata"].update({alias: value})
+    for alias_group in metadata_aliases.values():
+        for alias in alias_group:
+            value = kwargs.pop(alias, None)
+            if value is not None:
+                if kwargs.get("metadata", None) is None:
+                    kwargs.update({"metadata": {alias: value}})
+                else:
+                    kwargs["metadata"].update({alias: value})
     return attr.ib(*args, **kwargs)
 
 
@@ -51,7 +26,41 @@ class Model(metaclass=ModelMeta):
     pass
 
 
-definitions = {}
+# --------------------------------------------------------------- #
+# Route Documenters
+# --------------------------------------------------------------- #
+
+
+class RouteSpec:
+    consumes = None
+    consumes_content_type = None
+    produces = None
+    produces_content_type = None
+    summary = None
+    description = None
+    operation = None
+    blueprint = None
+    tags = None
+    exclude = None
+    responses = None
+
+    def __init__(self):
+        self.tags = []
+        self.consumes = []
+        self.responses = {}
+
+
+class RouteField:
+    field = None
+    location = None
+    required = None
+
+    def __init__(self, field, location=None, required=False):
+        self.field = field
+        self.location = location
+        self.required = required
+
+
 route_specs = defaultdict(RouteSpec)
 
 

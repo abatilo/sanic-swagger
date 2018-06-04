@@ -2,12 +2,12 @@ import re
 from itertools import repeat
 
 from sanic.blueprints import Blueprint
+from sanic.constants import HTTP_METHODS
 from sanic.response import json
 from sanic.views import CompositionView
-from sanic.constants import HTTP_METHODS
 
-from .doc import route_specs, RouteSpec, serialize_schema, definitions
-
+from .doc import route_specs, RouteSpec
+from .serializer import components, serialize
 
 blueprint = Blueprint("openapi", url_prefix="openapi")
 
@@ -25,7 +25,7 @@ def remove_nulls(dictionary, deep=True):
 
 @blueprint.listener("before_server_start")
 def build_spec(app, loop):
-    _spec["swagger"] = "2.0"
+    _spec["swagger"] = "3.0"
     _spec["info"] = {
         "version": getattr(app.config, "API_VERSION", "1.0.0"),
         "title": getattr(app.config, "API_TITLE", "API"),
@@ -135,7 +135,7 @@ def build_spec(app, loop):
             for parameter in route.parameters:
                 route_parameters.append(
                     {
-                        **serialize_schema(parameter.cast),
+                        **serialize(parameter.cast),
                         "required": True,
                         "in": "path",
                         "name": parameter.name,
@@ -143,7 +143,7 @@ def build_spec(app, loop):
                 )
 
             for consumer in route_spec.consumes:
-                spec = serialize_schema(consumer.field)
+                spec = serialize(consumer.field)
                 if "properties" in spec:
                     for name, prop_spec in spec["properties"].items():
                         route_param = {
@@ -172,14 +172,14 @@ def build_spec(app, loop):
                 route_spec.responses["200"] = {
                     "description": "successful operation",
                     "example": None,
-                    "schema": serialize_schema(route_spec.produces)
+                    "schema": serialize(route_spec.produces)
                     if route_spec.produces
                     else None,
                 }
 
             for k, v in route_spec.responses.items():
                 if v.get("model", None) is not None:
-                    schema = serialize_schema(v.get("model"))
+                    schema = serialize(v.get("model"))
                     route_spec.responses[k]["schema"] = schema
                     del route_spec.responses[k]["model"]
 
@@ -209,13 +209,12 @@ def build_spec(app, loop):
         paths[uri_parsed] = methods
 
     # --------------------------------------------------------------- #
-    # Definitions
+    # Components
     # --------------------------------------------------------------- #
 
-    _spec["definitions"] = {
-        obj.object_name: definition
-        for cls, (obj, definition) in definitions.items()
-    }
+    _spec["components"] = {}
+    _spec["components"]["schemas"] = {}
+    _spec["components"]["schemas"].update({str(key.__name__): definition for key, definition in components.items()})
 
     # --------------------------------------------------------------- #
     # Tags
