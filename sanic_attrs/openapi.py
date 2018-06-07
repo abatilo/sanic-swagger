@@ -25,7 +25,7 @@ def remove_nulls(dictionary, deep=True):
 
 @blueprint.listener("before_server_start")
 def build_spec(app, loop):
-    _spec["swagger"] = "3.0"
+    _spec["openapi"] = "3.0.0"
     _spec["info"] = {
         "version": getattr(app.config, "API_VERSION", "1.0.0"),
         "title": getattr(app.config, "API_TITLE", "API"),
@@ -172,7 +172,7 @@ def build_spec(app, loop):
                 route_spec.responses["200"] = {
                     "description": "successful operation",
                     "example": None,
-                    "schema": serialize(route_spec.produces)
+                    "schema": serialize(route_spec.produces.field)
                     if route_spec.produces
                     else None,
                 }
@@ -214,7 +214,12 @@ def build_spec(app, loop):
 
     _spec["components"] = {}
     _spec["components"]["schemas"] = {}
-    _spec["components"]["schemas"].update({str(key.__name__): definition for key, definition in components.items()})
+    _spec["components"]["schemas"].update(
+        {
+            str(key.__name__): definition
+            for key, definition in components.items()
+        }
+    )
 
     # --------------------------------------------------------------- #
     # Tags

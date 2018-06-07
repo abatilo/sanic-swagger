@@ -12,7 +12,7 @@ from typing import (
     Mapping,
     Sequence,
     Set,
-    Union
+    Union,
 )
 
 import attr
@@ -26,7 +26,9 @@ components = {}
 
 def serialize(field, model=None):
     if hasattr(field, "type"):
-        return _merge_metadata(_serialize_type(field.type, model), field, model)
+        return _merge_metadata(
+            _serialize_type(field.type, model), field, model
+        )
     else:
         return _serialize_type(field, model)
 
@@ -41,16 +43,17 @@ def _generate_component(func):
             "type": output.get("type"),
             "format": output.get("format", None),
             "schema": {
-                "$ref": '#/components/schemas/{}'.format(type_.__name__)
-            }
+                "$ref": "#/components/schemas/{}".format(type_.__name__)
+            },
         }
+
     return wrapper
 
 
 def _camel_case(snake_str):
     # from https://stackoverflow.com/a/42450252
-    first, *others = snake_str.split('_')
-    return ''.join([first.lower(), *map(str.title, others)])
+    first, *others = snake_str.split("_")
+    return "".join([first.lower(), *map(str.title, others)])
 
 
 def _raise_simple_type(simple_type, *encouraged_type):
@@ -94,7 +97,11 @@ def _serialize_type(type_, model):
             output.update({"nullable": True})
             return output
         else:
-            return {"oneOf": [_serialize_type(arg, model) for arg in type_.__args__]}
+            return {
+                "oneOf": [
+                    _serialize_type(arg, model) for arg in type_.__args__
+                ]
+            }
 
 
 @_serialize_type.register(EnumMeta)  # for enums
@@ -111,7 +118,9 @@ def _serialize_generic_meta(type_, model):
     if type_.__base__ in (List, Set, Sequence, Collection, Iterable):
         output = {"type": "array"}
         if len(type_.__args__):
-            output.update({"items": {**_serialize_type(type_.__args__[0], model)}})
+            output.update(
+                {"items": {**_serialize_type(type_.__args__[0], model)}}
+            )
         return output
     elif type_.__base__ in (Dict, Mapping):
         output = {"type": "object"}
@@ -133,7 +142,8 @@ def _serialize_model(type_, model):
     output = {
         "type": "object",
         "properties": {
-            str(field.name): serialize(field, type_) for field in attr.fields(type_)
+            str(field.name): serialize(field, type_)
+            for field in attr.fields(type_)
         },
     }
     if model is None and type_ in required_fields:
