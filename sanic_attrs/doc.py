@@ -1,4 +1,5 @@
 from collections import defaultdict
+from enum import EnumMeta
 
 import attr
 
@@ -19,6 +20,14 @@ def field(*args, **kwargs):
 
 class ModelMeta(type):
     def __new__(mcls, name, bases, attrs):
+        if bases:
+            for f in attrs.values():
+                if (
+                    hasattr(f, "type")
+                    and f.type is not None
+                    and type(f.type) == EnumMeta
+                ):
+                    f.converter = attr.converters.optional(f.type)
         return attr.s(super().__new__(mcls, name, bases, attrs))
 
 

@@ -1,8 +1,7 @@
-# [Sanic](https://github.com/channelcat/sanic) + [attrs](http://www.attrs.org/) towards [OpenAPI 3.0](https://swagger.io/docs/specification/about/)
+# [Sanic](https://github.com/channelcat/sanic) + [attrs](http://www.attrs.org/) towards with [Swagger 2.0](https://swagger.io/docs/specification/2-0/basic-structure/) / OpenAPI support
 
-**Note**: This is a fork of Sanic OpenAPI implementation from [@channelcat](https://github.com/channelcat), which I like a lot but it lacks some of the functionality I wanted (and I also went sideways by using a third-party lib ([`attrs`](http://www.attrs.org/)) as default for modeling your classes).
+**Note**: This is a fork of Sanic OpenAPI implementation from [@channelcat](https://github.com/channelcat), which I like a lot but it lacks some of the functionality I wanted (and I also went sideways by using a third-party lib ([`attrs`](http://www.attrs.org/)) as default for modeling input / output model classes).
 
-[![Build Status](https://travis-ci.org/vltr/sanic-attrs.svg?branch=master)](https://travis-ci.org/vltr/sanic-attrs)
 [![PyPI](https://img.shields.io/pypi/v/sanic-attrs.svg)](https://pypi.python.org/pypi/sanic-attrs/)
 [![PyPI](https://img.shields.io/pypi/pyversions/sanic-attrs.svg)](https://pypi.python.org/pypi/sanic-attrs/)
 
@@ -11,6 +10,8 @@ Give your Sanic API a UI and OpenAPI documentation, all for the price of free!
 ![Example Swagger UI](images/code-to-ui.png?raw=true "Swagger UI")
 
 ## Installation
+
+**Attention**: since this fork came from a necessity of mine, a lot of features I want to implement are still not available, hence the status of `pre-alpha` to this library! Also, _don't try the examples folder_, it was not converted (yet)! Shame on me ...
 
 ```shell
 pip install sanic-attrs
@@ -27,9 +28,11 @@ app.blueprint(swagger_blueprint)
 
 You'll now have a Swagger UI at the URL `/swagger`. Your routes will be automatically categorized by their blueprints. This is the default usage, but more advanced usage can be seen. Keep reading!
 
+_Note_: the `swagger_blueprint` is awesome but sometimes you don't want it open-wide for whatever reason you have (security, etc), so you can make it available only if running with `debug=True`, for example. That's how I actually use it :smile:
+
 ## [typing](https://docs.python.org/3/library/typing.html)
 
-Since `sanic-attrs` is, of course, based on `attrs` and the Python target version is 3.5+, most of the typing definitions for your model will be made entirely using Python types, either global ones or from the `typing` library. Also, `enums` are supported as well :smiley:
+Since `sanic-attrs` is, of course, based on `attrs` and the Python target version is 3.5+, most of the typing definitions for your model will be made entirely using Python types, either global ones or from the `typing` library. Also, `enums` are supported as well! :sparkles:
 
 Here's the types supported (so far):
 
@@ -53,26 +56,22 @@ Here's the types supported (so far):
 
 **A note on `list` and `dict`**: Please, use `typing.List` and `typing.Dict` for this.
 
-## Example
-
-For an example Swagger UI, see the [Pet Store](http://petstore.swagger.io/)
-
 ## Usage
 
-### Use simple decorators to document routes:
+### Use simple decorators to document routes
 
 ```python
 from sanic_attrs import doc
 
 @app.get("/user/<user_id:int>")
 @doc.summary("Fetches a user by ID")
-@doc.produces({ "user": { "name": str, "id": int } })
+@doc.produces(SomeOutputModel)
 async def get_user(request, user_id):
     ...
 
 @app.post("/user")
 @doc.summary("Creates a user")
-@doc.consumes({"user": { "name": str }}, location="body")
+@doc.consumes(SomeInputModel, location="body")
 async def create_user(request):
     ...
 ```
@@ -83,6 +82,7 @@ Yes, in this version you **need** to be descriptive :wink:
 
 ```python
 import typing
+
 from sanic_attrs import doc
 
 
@@ -147,7 +147,7 @@ class AnotherSomething:
 
 class Game(doc.Model):
     name: str = doc.field(description="The name of the game")
-    platform: PlatformEnum = doc.field(description="Which platform it runs on")
+    platform = doc.field(type=PlatformEnum, description="Which platform it runs on")
     score: float = doc.field(description="The average score of the game")
     resolution_tested: str = doc.field(description="The resolution which the game was tested")
     genre: List[str] = doc.field(description="One or more genres this game is part of")
@@ -160,18 +160,92 @@ class Game(doc.Model):
     review_link: Optional[str] = doc.field(description="The link of the game review (if exists)")
     junk: Union[str, bytes] = doc.field(description="This should be strange")
     more_junk: Any = doc.field(description="The more junk field")
-    language: LanguageEnum = doc.field(description="The language of the game")
+    language = doc.field(type=LanguageEnum, description="The language of the game")
     something: List[Something] = doc.field(description="Something to go along the game")
     another: AnotherSomething = doc.field(description="Another something to go along the game")
 ```
 
-### Enabling on-the-fly input model validation
+### A note on `enum`
 
-TODO.
+You may have noticed that in the example above, all `enum` fields were given as the `type` argument of the `doc.field` function. The reason for this is quite simple: `sanic-attrs` will automatically add a custom converter to your fields (**if and only if** your model is declared subclassing `doc.Model`) so when your model is instantiated, the correspondent value of the `enum` will be converted to the `enum` itself, for practical reasons.
 
-### Enabling on-the-fly output model serialization
+### A note on a lot of features of `attr`
 
-TODO.
+There are a lot of features in `attr` that can be handy while declaring a model, such as validators, factories and etc. For this release, nothing is planned regarding those features and I would not encourage its usage while declaring models since I still hadn't time to actually test them :confused:
+
+## On-the-fly input model parsing
+
+There are a few surprises inside `sanic-attrs`. Let's say you have already declared your model, your endpoint and you still have to take the `request.json` and load it as your model? That doesn't seems right ... Fortunatelly, a small middleware was written to handle these cases :wink:
+
+**Note**: there are no validations or exception handlers to deal with broken data. Mostly, I would recommend creating a exception handler for your application:
+
+```python
+from attr.exceptions import NotAnAttrsClassError
+
+
+@app.exception(NotAnAttrsClassError)
+def i_should_only_use_attr_models(request, exception):
+    # error handling here
+```
+
+Keep in mind that all `attr.exceptions` [derivates from default](https://github.com/python-attrs/attrs/blob/master/src/attr/exceptions.py) Python exceptions!
+
+To enable on-the-fly input model parsing, all you need to do is add a `blueprint` to your Sanic app and access the object using the `input_obj` keyword directly from the request:
+
+```python
+from sanic_attrs import parser_blueprint
+
+# ...
+
+app.blueprint(parser_blueprint)
+
+# ...
+
+@app.post("/game", strict_slashes=True)
+@doc.summary("Inserts the game data into the database")
+@doc.response("200", "Game inserted successfuly", model=SuccessOutput)
+@doc.response("403", "The user couldn't insert game to application", model=ErrorOutput)
+@doc.consumes(Game, location="body", content_type="application/json")
+@doc.produces(SuccessOutput)
+async def insert_game(request):
+    my_object = request["input_obj"]
+    assert isinstance(my_object, Game)
+    # your logic here
+```
+
+## On-the-fly output model serialization
+
+To keep things simple, it is also possible to handle the direct return of `attr` objects, instead of having to create a dictionary and then serialize or call `sanic.responses.json`, although this is exactly what's running under the hood:
+
+```python
+from sanic_attrs import response
+
+# ...
+
+@app.get("/game", strict_slashes=True)
+@doc.summary("Gets the most played game in our database")
+@doc.response("200", "Game data", model=Game)
+@doc.response("403", "The user can't access this endpoint", model=ErrorOutput)
+@doc.produces(Game)
+async def get_game(request):
+    game = Game(
+        name="Cities: Skylines",
+        platform="PC",
+        score=9.0,
+        resolution_tested="1920x1080",
+        genre=["Simulators", "City Building"],
+        rating={
+            "IGN": 8.5,
+            "Gamespot": 8.0,
+            "Steam": 4.5
+        },
+        players=["Flux", "strictoaster"],
+        language=1
+    )
+    return response.model(game)  # <--- the game instance, to be further serialized
+```
+
+**Note**: remember to create models that can have all its values serializable to JSON :+1:
 
 ### Configure all the things
 
@@ -186,7 +260,7 @@ app.config.API_CONTACT_EMAIL = 'channelcat@gmail.com'
 
 ### Types not avaiable
 
-These are the types not available from [`typing`](https://docs.python.org/3/library/typing.html) in the current version:
+These are the types not available from [`typing`](https://docs.python.org/3/library/typing.html) in the current version (with some notes so I can remember what to do later (if necessary)):
 
 - `AbstractSet  # would be like set?`
 - `AnyStr  # this is mostly like Optional[str] or just str`
@@ -250,6 +324,13 @@ These are the types not available from [`typing`](https://docs.python.org/3/libr
 - `TypingMeta  # generics`
 
 If there's anything missing or required, please fill in a issue or contribute with a PR. PR's are most welcome :smiley:
+
+## TODO
+
+- [ ] Proper testing
+- [ ] Increase use cases
+- [ ] Find out if I can get the request model without calling the router
+- [ ] Documentation
 
 ## License
 

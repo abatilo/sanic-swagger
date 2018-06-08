@@ -1,4 +1,3 @@
-
 from datetime import date, datetime
 from enum import EnumMeta
 from functools import singledispatch
@@ -42,9 +41,7 @@ def _generate_component(func):
         return {
             "type": output.get("type"),
             "format": output.get("format", None),
-            "schema": {
-                "$ref": "#/components/schemas/{}".format(type_.__name__)
-            },
+            "$ref": "#/definitions/{}".format(type_.__name__),
         }
 
     return wrapper

@@ -25,7 +25,7 @@ def remove_nulls(dictionary, deep=True):
 
 @blueprint.listener("before_server_start")
 def build_spec(app, loop):
-    _spec["openapi"] = "3.0.0"
+    _spec["swagger"] = "2.0"
     _spec["info"] = {
         "version": getattr(app.config, "API_VERSION", "1.0.0"),
         "title": getattr(app.config, "API_TITLE", "API"),
@@ -209,12 +209,11 @@ def build_spec(app, loop):
         paths[uri_parsed] = methods
 
     # --------------------------------------------------------------- #
-    # Components
+    # Definitions
     # --------------------------------------------------------------- #
 
-    _spec["components"] = {}
-    _spec["components"]["schemas"] = {}
-    _spec["components"]["schemas"].update(
+    _spec["definitions"] = {}
+    _spec["definitions"].update(
         {
             str(key.__name__): definition
             for key, definition in components.items()
