@@ -1,20 +1,21 @@
-import codecs
 import os
-import re
 from setuptools import setup
 
+here = os.path.abspath(os.path.dirname(__file__))
 
-with codecs.open(os.path.join(os.path.abspath(os.path.dirname(
-        __file__)), 'sanic_attrs', '__init__.py'), 'r', 'latin1') as fp:
-    try:
-        version = re.findall(r"^__version__ = '([^']+)'\r?$",
-                             fp.read(), re.M)[0]
-    except IndexError:
-        raise RuntimeError('Unable to determine version.')
+about = {'version': '0.1.0'}
+
+with open(
+    os.path.join(here, 'sanic_attrs', '__init__.py'), 'r', encoding='utf-8'
+) as f:
+    for line in f:
+        if line.startswith('__version__'):
+            about['version'] = line.strip().split('=')[1].strip(' \'"')
+
 
 setup(
     name='sanic-attrs',
-    version=version,
+    version=about['version'],
     url='http://github.com/vltr/sanic-attrs/',
     license='MIT',
     author='Channel Cat',
