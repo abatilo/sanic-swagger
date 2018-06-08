@@ -110,7 +110,7 @@ async def get_garage(request):
 
 ### Advanced usage
 
-Since `doc.Model` and `doc.field` are nothing more as syntatic sugar for the `@attr.s` decorator and `attr.ib` function, you can express your models using these provided classes and methods or use vanilla `attr` in your models. Here's a complex example that shows a mixed model:
+Since `doc.Model` and `doc.field` are nothing more as syntatic sugar for the `@attr.s` decorator and `attr.ib` function, you can express your models using these provided classes and methods or use vanilla `attrs` in your models. Here's a complex example that shows a mixed model:
 
 ```python
 from enum import Enum, IntEnum
@@ -169,9 +169,9 @@ class Game(doc.Model):
 
 You may have noticed that in the example above, all `enum` fields were given as the `type` argument of the `doc.field` function. The reason for this is quite simple: `sanic-attrs` will automatically add a custom converter to your fields (**if and only if** your model is declared subclassing `doc.Model`) so when your model is instantiated, the correspondent value of the `enum` will be converted to the `enum` itself, for practical reasons.
 
-### A note on a lot of features of `attr`
+### A note on a lot of features of `attrs`
 
-There are a lot of features in `attr` that can be handy while declaring a model, such as validators, factories and etc. For this release, nothing is planned regarding those features and I would not encourage its usage while declaring models since I still hadn't time to actually test them :confused:
+There are a lot of features in `attrs` that can be handy while declaring a model, such as validators, factories and etc. For this release, nothing is planned regarding those features and I would not encourage its usage while declaring models since I still hadn't time to actually test them :confused:
 
 ## On-the-fly input model parsing
 
@@ -215,7 +215,7 @@ async def insert_game(request):
 
 ## On-the-fly output model serialization
 
-To keep things simple, it is also possible to handle the direct return of `attr` objects, instead of having to create a dictionary and then serialize or call `sanic.responses.json`, although this is exactly what's running under the hood:
+To keep things simple, it is also possible to handle the direct return of `attrs` objects, instead of having to create a dictionary and then serialize or call `sanic.responses.json`, although this is exactly what's running under the hood:
 
 ```python
 from sanic_attrs import response
