@@ -7,7 +7,7 @@
 
 Give your Sanic API a UI and OpenAPI documentation, all for the price of free!
 
-![Example Swagger UI](https://github.com/vltr/sanic-attrs/blob/master/images/code-to-ui.png?raw=true "Swagger UI"){:class="img-responsive"}
+![Example Swagger UI](https://github.com/vltr/sanic-attrs/blob/master/images/code-to-ui.png?raw=true "Swagger UI")
 
 ## Installation
 
