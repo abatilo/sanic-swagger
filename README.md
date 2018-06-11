@@ -177,19 +177,6 @@ There are a lot of features in `attrs` that can be handy while declaring a model
 
 There are a few surprises inside `sanic-attrs`. Let's say you have already declared your model, your endpoint and you still have to take the `request.json` and load it as your model? That doesn't seems right ... Fortunatelly, a small middleware was written to handle these cases :wink:
 
-**Note**: there are no validations or exception handlers to deal with broken data. Mostly, I would recommend creating a exception handler for your application:
-
-```python
-from attr.exceptions import NotAnAttrsClassError
-
-
-@app.exception(NotAnAttrsClassError)
-def i_should_only_use_attr_models(request, exception):
-    # error handling here
-```
-
-Keep in mind that all `attr.exceptions` [derivates from default](https://github.com/python-attrs/attrs/blob/master/src/attr/exceptions.py) Python exceptions!
-
 To enable on-the-fly input model parsing, all you need to do is add a `blueprint` to your Sanic app and access the object using the `input_obj` keyword directly from the request:
 
 ```python
@@ -211,6 +198,25 @@ async def insert_game(request):
     my_object = request["input_obj"]
     assert isinstance(my_object, Game)
     # your logic here
+```
+
+**Note**: there are no validations to deal with broken data. If an exception occurs while populating your model, you will find that your `input_obj` keyword will be `None`, along with another key `input_exc` that will contain the exception given. If you want to further customize this behavior so you won't need to check for `None` in every request, you can add your own `middleware` **after** adding the `parser_blueprint` to the `app` instance, like the following:
+
+```python
+from sanic.response import json
+from sanic_attrs import parser_blueprint
+
+# ...
+
+app.blueprint(parser_blueprint)
+
+# ...
+
+@app.middleware("request")
+async def check_if_input_is_none(request):
+    if request["input_obj"] is None:
+        # error handling here
+        return json({"error": request["input_exc"].args[0]}, 500)
 ```
 
 ## On-the-fly output model serialization

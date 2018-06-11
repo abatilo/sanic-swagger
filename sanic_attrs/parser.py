@@ -22,4 +22,9 @@ async def parse_middleware(request):
             spec = route_specs[route[0]]
             if len(spec.consumes) and attr.has(spec.consumes[0].field):
                 spec_cls = spec.consumes[0].field
-                request["input_obj"] = spec_cls(**request.json)
+                try:
+                    request["input_obj"] = spec_cls(**request.json)
+                    request["input_exc"] = None
+                except Exception as e:
+                    request["input_obj"] = None
+                    request["input_exc"] = e
