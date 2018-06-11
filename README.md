@@ -7,7 +7,7 @@
 
 Give your Sanic API a UI and OpenAPI documentation, all for the price of free!
 
-![Example Swagger UI](images/code-to-ui.png?raw=true "Swagger UI")
+![Example Swagger UI](https://github.com/vltr/sanic-attrs/blob/master/images/code-to-ui.png?raw=true "Swagger UI"){:class="img-responsive"}
 
 ## Installation
 
@@ -214,9 +214,10 @@ app.blueprint(parser_blueprint)
 
 @app.middleware("request")
 async def check_if_input_is_none(request):
-    if request["input_obj"] is None and isinstance(request["input_exc"], Exception):
-        # error handling here
-        return json({"error": request["input_exc"].args[0]}, 500)
+    if "input_obj" in request:
+        if request["input_obj"] is None:
+            # error handling here
+            return json({"error": request["input_exc"].args[0]}, 500)
 ```
 
 ## On-the-fly output model serialization
