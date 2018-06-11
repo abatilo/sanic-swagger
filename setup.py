@@ -12,6 +12,9 @@ with open(
         if line.startswith('__version__'):
             about['version'] = line.strip().split('=')[1].strip(' \'"')
 
+with open(os.path.join(here, 'README.md'), 'r', encoding='utf-8') as f:
+    README = f.read()
+
 
 setup(
     name='sanic-attrs',
@@ -23,6 +26,7 @@ setup(
     maintainer='Richard Kuesters',
     maintainer_email="rkuesters@gmail.com",
     description='OpenAPI / Swagger support for Sanic using attrs',
+    long_description=README,
     packages=['sanic_attrs'],
     package_data={'sanic_attrs': ['ui/*']},
     platforms='any',
