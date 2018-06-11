@@ -200,7 +200,7 @@ async def insert_game(request):
     # your logic here
 ```
 
-**Note**: there are no validations to deal with broken data. If an exception occurs while populating your model, you will find that your `input_obj` keyword will be `None`, along with another key `input_exc` that will contain the exception given. If you want to further customize this behavior so you won't need to check for `None` in every request, you can add your own `middleware` **after** adding the `parser_blueprint` to the `app` instance, like the following:
+**Note**: there are no validations to deal with broken data. If an exception occurs while populating your model, you will find that your `input_obj` keyword will be `None`, along with another key, `input_exc`, that will contain the exception given (if any). If you want to further customize this behavior so you won't need to check for `None` in every request, you can add your own `middleware` **after** adding the `parser_blueprint` to the `app` instance, like the following:
 
 ```python
 from sanic.response import json
@@ -214,7 +214,7 @@ app.blueprint(parser_blueprint)
 
 @app.middleware("request")
 async def check_if_input_is_none(request):
-    if request["input_obj"] is None:
+    if request["input_obj"] is None and isinstance(request["input_exc"], Exception):
         # error handling here
         return json({"error": request["input_exc"].args[0]}, 500)
 ```
