@@ -3,7 +3,7 @@ from setuptools import setup
 
 here = os.path.abspath(os.path.dirname(__file__))
 
-about = {'version': '0.1.1'}
+about = {'version': '0.1.2'}
 
 with open(
     os.path.join(here, 'sanic_attrs', '__init__.py'), 'r', encoding='utf-8'
@@ -27,6 +27,7 @@ setup(
     maintainer_email="rkuesters@gmail.com",
     description='OpenAPI / Swagger support for Sanic using attrs',
     long_description=README,
+    long_description_content_type='text/markdown',
     packages=['sanic_attrs'],
     package_data={'sanic_attrs': ['ui/*']},
     platforms='any',
