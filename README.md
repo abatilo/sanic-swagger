@@ -1,11 +1,18 @@
-# [Sanic](https://github.com/channelcat/sanic) + [attrs](http://www.attrs.org/) towards with [Swagger 2.0](https://swagger.io/docs/specification/2-0/basic-structure/) / OpenAPI support
+# Sanic with attrs towards Swagger 2.0 / OpenAPI support
+
+Supercharge your [Sanic](https://github.com/channelcat/sanic>) app with:
+
+- [attrs](http://www.attrs.org/)
+- [Swagger](https://swagger.io/docs/specification/2-0/basic-structure/)
 
 **Note**: This is a fork of Sanic OpenAPI implementation from [@channelcat](https://github.com/channelcat), which I like a lot but it lacks some of the functionality I wanted (and I also went sideways by using a third-party lib ([`attrs`](http://www.attrs.org/)) as default for modeling input / output model classes).
 
 [![PyPI](https://img.shields.io/pypi/v/sanic-attrs.svg)](https://pypi.python.org/pypi/sanic-attrs/)
 [![PyPI](https://img.shields.io/pypi/pyversions/sanic-attrs.svg)](https://pypi.python.org/pypi/sanic-attrs/)
 
-Give your Sanic API a UI and OpenAPI documentation, all for the price of free!
+## Super quick introduction
+
+Give your Sanic API an UI and OpenAPI documentation, all for the price of free!
 
 ![Example Swagger UI](https://github.com/vltr/sanic-attrs/blob/master/images/code-to-ui.png?raw=true "Swagger UI")
 
@@ -254,7 +261,7 @@ async def get_game(request):
 
 **Note**: remember to create models that can have all its values serializable to JSON :+1:
 
-### Configure all the things
+### Configure everything else
 
 ```python
 app.config.API_VERSION = '1.0.0'
@@ -265,70 +272,70 @@ app.config.API_PRODUCES_CONTENT_TYPES = ['application/json']
 app.config.API_CONTACT_EMAIL = 'channelcat@gmail.com'
 ```
 
-### Types not avaiable
+### Types not *yet* avaiable
 
 These are the types not available from [`typing`](https://docs.python.org/3/library/typing.html) in the current version (with some notes so I can remember what to do later (if necessary)):
 
-- `AbstractSet  # would be like set?`
-- `AnyStr  # this is mostly like Optional[str] or just str`
-- `AsyncContextManager  # not a variable I think`
-- `AsyncGenerator  # not a variable I think`
-- `AsyncIterable  # not a variable I think`
-- `AsyncIterator  # not a variable I think`
-- `Awaitable  # not a variable I think`
-- `BinaryIO  # hmmm, I don't know ...`
-- `ByteString  # could be like bytes, for openapi is {"type":"string", "format": "byte"}`
-- `CT_co  # wtf is this?`
-- `Callable  # not a variable`
-- `CallableMeta  # not a variable`
-- `ChainMap  # not a variable`
-- `ClassVar  # generic ...`
-- `Container  # generic`
-- `ContextManager  # not a variable`
-- `Coroutine  # not a variable`
-- `Counter  # not a variable`
-- `DefaultDict  # perhaps like dict?`
-- `Deque  # like List ?`
-- `FrozenSet  # a "view-only list?`
-- `Generator  # not a variable`
-- `Generic  # no way - or Any?`
-- `Hashable  # a hashmap?`
-- `IO  # hmmm, from docs: "Generic base class for TextIO and BinaryIO.", so ...`
-- `ItemsView  # what is an Item? it inherits from AbstractSet ... from docs: "A set is a finite, iterable container."`
-- `Iterator  # not a variable`
-- `KT  # generics`
-- `KeysView  # dict "readonly" ?`
-- `MappingView  # dict "readonly" ?`
-- `Match  # generic (I think)`
-- `MethodDescriptorType  # not a variable`
-- `MethodWrapperType  # not a variable`
-- `MutableMapping  # base class of Mapping, docs: "Abstract base class for generic types."`
-- `MutableSequence  # same as above, but for Sequence`
-- `MutableSet  # same as above, but for Set`
-- `NamedTuple  # what to do here? NamedTuple is just an object with variables that can be *anything* I guess ...`
-- `NamedTupleMeta  # baseclass of NamedTuple`
-- `NewType  # not a variable`
-- `NoReturn  # not a variable`
-- `Pattern  # generic`
-- `Reversible  # generic (Iterable)`
-- `Sized  # generic`
-- `SupportsAbs  # not a variable`
-- `SupportsBytes  # not a variable`
-- `SupportsComplex  # not a variable`
-- `SupportsFloat  # not a variable`
-- `SupportsInt  # not a variable`
-- `SupportsRound  # not a variable`
-- `T  # generic`
-- `TYPE_CHECKING  # ???`
-- `T_co  # ???`
-- `T_contra  # ???`
-- `Text  # returns a str object if created, so I'll stick with str or map it too?`
-- `TextIO  # buffer, like bytes ... map it?`
-- `Tuple  # well ... Tuple like lists or Tuple like Tuple[int, str, float] ?`
-- `TupleMeta  # baseclass of Tuple`
-- `Type  # generics`
-- `TypeVar  # generics`
-- `TypingMeta  # generics`
+- `AbstractSet` - would be like set?
+- `AnyStr` - this is mostly like Optional[str] or just str?
+- `AsyncContextManager` - not a variable I think
+- `AsyncGenerator` - not a variable I think
+- `AsyncIterable` - not a variable I think
+- `AsyncIterator` - not a variable I think
+- `Awaitable` - not a variable I think
+- `BinaryIO` - hmmm, I don't know ... Bytes maybe?
+- `ByteString` - could be like bytes, for openapi is `{"type":"string", "format": "byte"}`
+- `CT_co` - I don't even know what this is ...
+- `Callable` - not a variable
+- `CallableMeta` - not a variable
+- `ChainMap` - not a variable (?)
+- `ClassVar` - generic ...
+- `Container` - generic
+- `ContextManager` - not a variable
+- `Coroutine` - not a variable
+- `Counter` - not a variable
+- `DefaultDict` - perhaps like dict?
+- `Deque` - like List ?
+- `FrozenSet` - a "view-only list?
+- `Generator` - not a variable
+- `Generic` - no way - or Any?
+- `Hashable` - a hashmap?
+- `IO` - hmmm, from docs: "Generic base class for TextIO and BinaryIO.", so ...
+- `ItemsView` - what is an Item? it inherits from AbstractSet ... from docs: "A set is a finite, iterable container."
+- `Iterator` - not a variable
+- `KT` - generics
+- `KeysView` - dict "readonly" ?
+- `MappingView` - dict "readonly" ?
+- `Match` - generic (I think)
+- `MethodDescriptorType` - not a variable
+- `MethodWrapperType` - not a variable
+- `MutableMapping` - base class of Mapping, docs: "Abstract base class for generic types."
+- `MutableSequence` - same as above, but for Sequence
+- `MutableSet` - same as above, but for Set
+- `NamedTuple` - what to do here? NamedTuple is just an object with variables that can be *anything* I guess ...
+- `NamedTupleMeta` - baseclass of NamedTuple
+- `NewType` - not a variable / generic ?
+- `NoReturn` - not a variable
+- `Pattern` - generic
+- `Reversible` - generic (Iterable)
+- `Sized` - generic
+- `SupportsAbs` - not a variable
+- `SupportsBytes` - not a variable
+- `SupportsComplex` - not a variable
+- `SupportsFloat` - not a variable
+- `SupportsInt` - not a variable
+- `SupportsRound` - not a variable
+- `T` - generic
+- `TYPE_CHECKING` - ???
+- `T_co` - ???
+- `T_contra` - ???
+- `Text` - returns a str object if created, so I'll stick with str or map it too?
+- `TextIO` - buffer, like bytes ... map it?
+- `Tuple` - well ... Tuple like lists or Tuple like Tuple[int, str, float] ?
+- `TupleMeta` - baseclass of Tuple
+- `Type` - generics
+- `TypeVar` - generics
+- `TypingMeta` - generics
 
 If there's anything missing or required, please fill in a issue or contribute with a PR. PR's are most welcome :smiley:
 
