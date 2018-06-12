@@ -3,7 +3,7 @@ from setuptools import setup
 
 here = os.path.abspath(os.path.dirname(__file__))
 
-about = {'version': '0.2.0'}
+about = {'version': '0.2.1'}
 
 with open(
     os.path.join(here, 'sanic_attrs', '__init__.py'), 'r', encoding='utf-8'

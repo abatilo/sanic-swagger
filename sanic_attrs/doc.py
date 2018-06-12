@@ -40,7 +40,9 @@ def _implement_converter(field, key, annotations):
 @singledispatch
 def _converter(type_, field):
     if attr.has(type_):
-        field.converter = attr.converters.optional(type_)
+        field.converter = attr.converters.optional(
+            partial(_model_converter, type_)
+        )
 
 
 @_converter.register(EnumMeta)
@@ -49,6 +51,8 @@ def _converter_enum(type_, field):
 
 
 def _model_converter(model_cls, value):
+    if isinstance(value, model_cls):
+        return value
     return model_cls(**value)
 
 
