@@ -1,6 +1,6 @@
 from collections import defaultdict
 from enum import EnumMeta
-from functools import singledispatch
+from functools import partial, singledispatch
 
 import attr
 
@@ -44,9 +44,19 @@ def _converter(type_, field):
 
 
 @_converter.register(EnumMeta)
-@_converter.register(ModelMeta)
 def _converter_enum(type_, field):
     field.converter = attr.converters.optional(type_)
+
+
+def _model_converter(model_cls, value):
+    return model_cls(**value)
+
+
+@_converter.register(ModelMeta)
+def _converter_model_meta(type_, field):
+    field.converter = attr.converters.optional(
+        partial(_model_converter, type_)
+    )
 
 
 def _implement_validators(field, key, annotations):
