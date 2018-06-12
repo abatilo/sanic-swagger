@@ -1,5 +1,4 @@
 import attr
-
 from sanic.response import HTTPResponse, json_dumps
 
 

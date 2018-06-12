@@ -1,9 +1,7 @@
 import attr
-
 from sanic.blueprints import Blueprint
 
 from .doc import route_specs
-
 
 blueprint = Blueprint("attrs_parser", url_prefix="parser")
 
@@ -23,7 +21,9 @@ async def parse_middleware(request):
             if len(spec.consumes) and attr.has(spec.consumes[0].field):
                 spec_cls = spec.consumes[0].field
                 try:
-                    request["input_obj"] = spec_cls(**request.json)
+                    instance = spec_cls(**request.json)
+                    attr.validate(instance)
+                    request["input_obj"] = instance
                     request["input_exc"] = None
                 except Exception as e:
                     request["input_obj"] = None

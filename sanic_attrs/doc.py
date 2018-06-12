@@ -1,9 +1,11 @@
 from collections import defaultdict
 from enum import EnumMeta
+from functools import singledispatch
 
 import attr
 
 from .options import metadata_aliases
+from .validators import max_str_len, min_max_str_len, min_str_len
 
 
 def field(*args, **kwargs):
@@ -21,14 +23,62 @@ def field(*args, **kwargs):
 class ModelMeta(type):
     def __new__(mcls, name, bases, attrs):
         if bases:
-            for f in attrs.values():
-                if (
-                    hasattr(f, "type")
-                    and f.type is not None
-                    and type(f.type) == EnumMeta
-                ):
-                    f.converter = attr.converters.optional(f.type)
+            for k, f in attrs.items():
+                annotations = attrs.get("__annotations__", {})
+                _implement_converter(f, k, annotations)
+                _implement_validators(f, k, annotations)
         return attr.s(super().__new__(mcls, name, bases, attrs))
+
+
+def _implement_converter(field, key, annotations):
+    if hasattr(field, "type") and field.type:
+        _converter(field.type, field)
+    elif key in annotations:
+        _converter(annotations.get(key), field)
+
+
+@singledispatch
+def _converter(type_, field):
+    if attr.has(type_):
+        field.converter = attr.converters.optional(type_)
+
+
+@_converter.register(EnumMeta)
+@_converter.register(ModelMeta)
+def _converter_enum(type_, field):
+    field.converter = attr.converters.optional(type_)
+
+
+def _implement_validators(field, key, annotations):
+    if hasattr(field, "type") and field.type:
+        _implement_validator(field.type, field)
+    elif key in annotations:
+        _implement_validator(annotations.get(key), field)
+
+
+@singledispatch
+def _implement_validator(type_, field):
+    if type_ == str:
+        validator = None
+        if (
+            "min_length" in field.metadata
+            and "max_length" not in field.metadata
+        ):
+            validator = min_str_len
+        elif (
+            "max_length" in field.metadata
+            and "min_length" not in field.metadata
+        ):
+            validator = max_str_len
+        elif "min_length" in field.metadata and "max_length" in field.metadata:
+            validator = min_max_str_len
+        if validator is not None:
+            field.validator(validator)
+        # TODO implement patterns
+        # TODO implement format
+    # TODO number (minimum, maximum, exclusive_minimum, exclusive_maximum, multiple_of)
+    # TODO array (one_of, min_items, max_items, unique_items)
+    # TODO object (min_properties, max_properties)
 
 
 class Model(metaclass=ModelMeta):

@@ -154,7 +154,7 @@ class AnotherSomething:
 
 class Game(doc.Model):
     name: str = doc.field(description="The name of the game")
-    platform = doc.field(type=PlatformEnum, description="Which platform it runs on")
+    platform: PlatformEnum = doc.field(description="Which platform it runs on")
     score: float = doc.field(description="The average score of the game")
     resolution_tested: str = doc.field(description="The resolution which the game was tested")
     genre: List[str] = doc.field(description="One or more genres this game is part of")
@@ -167,18 +167,39 @@ class Game(doc.Model):
     review_link: Optional[str] = doc.field(description="The link of the game review (if exists)")
     junk: Union[str, bytes] = doc.field(description="This should be strange")
     more_junk: Any = doc.field(description="The more junk field")
-    language = doc.field(type=LanguageEnum, description="The language of the game")
+    language: LanguageEnum = doc.field(description="The language of the game")
     something: List[Something] = doc.field(description="Something to go along the game")
     another: AnotherSomething = doc.field(description="Another something to go along the game")
 ```
 
-### A note on `enum`
+### A note on typing hints or `type` argument
 
-You may have noticed that in the example above, all `enum` fields were given as the `type` argument of the `doc.field` function. The reason for this is quite simple: `sanic-attrs` will automatically add a custom converter to your fields (**if and only if** your model is declared subclassing `doc.Model`) so when your model is instantiated, the correspondent value of the `enum` will be converted to the `enum` itself, for practical reasons.
+You may have noticed that in the example above, all variables have been created using typing hints. While this is somewhat interesting, you may also want to use the `type` argument as provided from the `attr` package, and `sanic-attrs` is absolutely fine with that. So, our `Game` class would rather looks like:
+
+```python
+class Game(doc.Model):
+    name = doc.field(type=str, description="The name of the game")
+    platform = doc.field(type=PlatformEnum, description="Which platform it runs on")
+    score = doc.field(type=float, description="The average score of the game")
+    resolution_tested = doc.field(type=str, description="The resolution which the game was tested")
+    genre = doc.field(type=List[str], description="One or more genres this game is part of")
+    genre_extra = doc.field(type=Sequence[str], description="One or more genres this game is part of")
+    rating = doc.field(type=Dict[str, float], description="Ratings given on each country")
+    rating_outside = doc.field(type=Mapping[str, float], description="Ratings given on each country")
+    screenshots = doc.field(type=Set[bytes], description="Screenshots of the game")
+    screenshots_extra = doc.field(type=Collection[bytes], description="Screenshots of the game")
+    players = doc.field(type=Iterable[str], description="Some of the notorious players of this game")
+    review_link = doc.field(type=Optional[str], description="The link of the game review (if exists)")
+    junk = doc.field(type=Union[str, bytes], description="This should be strange")
+    more_junk = doc.field(type=Any, description="The more junk field")
+    language = doc.field(type=LanguageEnum, description="The language of the game")
+    something = doc.field(type=List[Something], description="Something to go along the game")
+    another = doc.field(type=AnotherSomething, description="Another something to go along the game")
+```
 
 ### A note on a lot of features of `attrs`
 
-There are a lot of features in `attrs` that can be handy while declaring a model, such as validators, factories and etc. For this release, nothing is planned regarding those features and I would not encourage its usage while declaring models since I still hadn't time to actually test them :confused:
+There are a lot of features in `attrs` that can be handy while declaring a model, such as validators, factories and etc. For this release, some syntatic sugar is planned regarding validators (since most of the rules can be provided to `doc.field`). Other features, like `factories`, are not encourage at this time (or for the lifetime of this project, undecided) while declaring models since there wasn't enough time to actually test them (so far) :confused:
 
 ## On-the-fly input model parsing
 
@@ -207,7 +228,7 @@ async def insert_game(request):
     # your logic here
 ```
 
-**Note**: there are no validations to deal with broken data. If an exception occurs while populating your model, you will find that your `input_obj` keyword will be `None`, along with another key, `input_exc`, that will contain the exception given (if any). If you want to further customize this behavior so you won't need to check for `None` in every request, you can add your own `middleware` **after** adding the `parser_blueprint` to the `app` instance, like the following:
+**Note**: there are no validations to deal with (really) broken data. If an exception occurs while populating your model, you will find that your `input_obj` keyword will be `None`, along with another key, `input_exc`, that will contain the exception given (if any). If you want to further customize this behavior so you won't need to check for `None` in every request, you can add your own `middleware` **after** adding the `parser_blueprint` to the `app` instance, like the following:
 
 ```python
 from sanic.response import json
@@ -341,6 +362,8 @@ If there's anything missing or required, please fill in a issue or contribute wi
 
 ## TODO
 
+- [ ] Property deal with `required` fields (in OpenAPI `object` schema)
+- [ ] Use type hinting to document the return of a function (as output schema / model)
 - [ ] Proper testing
 - [ ] Increase use cases
 - [ ] Find out if I can get the request model without calling the router
