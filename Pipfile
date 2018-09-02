@@ -14,6 +14,25 @@ Sanic = "==0.7.0"
 "e1839a8" = {path = ".", editable = true}
 
 [dev-packages]
+"flake8" = "*"
+"flake8-alfred" = "*"
+"flake8-blind-except" = "*"
+"flake8-bugbear" = "*"
+"flake8-builtins" = "*"
+"flake8-class-newline" = "*"
+"flake8-comprehensions" = "*"
+"flake8-deprecated" = "*"
+"flake8-import-order" = "*"
+"flake8-invalid-escape-sequences" = "*"
+"flake8-mutable" = "*"
+"flake8-quotes" = "*"
+"flake8-tidy-imports" = "*"
+"flake8-tuple" = "*"
+"pep8-naming" = "*"
+"coverage" = "*"
+"pytest" = "*"
+"pytest-cov" = "*"
+"pytest-watch" = "*"
 
 [requires]
-python_version = "3.6.5"
+python_version = "3.6"

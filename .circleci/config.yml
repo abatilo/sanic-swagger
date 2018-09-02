@@ -1,0 +1,45 @@
+version: 2
+jobs:
+  lint_git_commits:
+    docker:
+      - image: python:3.6
+    working_directory: ~/sanic-swagger
+    steps:
+      - checkout
+      - run: pip install gitlint
+      - run: gitlint --commits fbb925a...HEAD
+
+  lint:
+    docker:
+      - image: python:3.6
+    working_directory: ~/sanic-swagger
+    steps:
+      - checkout
+      - run: pip install pipenv
+      - run: pipenv install --dev
+      - run: pipenv run flake8 --show-source --import-order-style pep8
+
+  test:
+    docker:
+      - image: python:3.6
+    working_directory: ~/sanic-swagger
+    steps:
+      - checkout
+      - run: pip install pipenv
+      - run: pipenv install --dev
+      - run: pipenv run pytest --cov-report html --junit-xml=coverage.xml --cov-branch --cov-fail-under=90 -v --cov=sanic_attrs tests/
+      - run: mkdir -p test-results/pytest && cp coverage.xml test-results/pytest/results.xml
+
+      - store_artifacts:
+          path: htmlcov
+
+      - store_test_results:
+          path: test-results
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - lint_git_commits
+      - lint
+      - test
