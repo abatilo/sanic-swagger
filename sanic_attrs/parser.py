@@ -3,14 +3,14 @@ from sanic.blueprints import Blueprint
 
 from .doc import route_specs
 
-blueprint = Blueprint("attrs_parser", url_prefix="parser")
+blueprint = Blueprint('attrs_parser', url_prefix='parser')
 
 
-@blueprint.middleware("request")
+@blueprint.middleware('request')
 async def parse_middleware(request):
     if (
-        not request.method == "GET"
-        and request.headers.get("content-type", None) == "application/json"
+        not request.method == 'GET'
+        and request.headers.get('content-type', None) == 'application/json'
         and request.json is not None
     ):
         route = request.app.router.get(
@@ -21,8 +21,8 @@ async def parse_middleware(request):
             if len(spec.consumes) and attr.has(spec.consumes[0].field):
                 spec_cls = spec.consumes[0].field
                 try:
-                    request["input_obj"] = spec_cls(**request.json)
-                    request["input_exc"] = None
+                    request['input_obj'] = spec_cls(**request.json)
+                    request['input_exc'] = None
                 except Exception as e:
-                    request["input_obj"] = None
-                    request["input_exc"] = e
+                    request['input_obj'] = None
+                    request['input_exc'] = e

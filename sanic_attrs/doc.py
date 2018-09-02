@@ -13,25 +13,26 @@ def field(*args, **kwargs):
         for alias in alias_group:
             value = kwargs.pop(alias, None)
             if value is not None:
-                if kwargs.get("metadata", None) is None:
-                    kwargs.update({"metadata": {alias: value}})
+                if kwargs.get('metadata', None) is None:
+                    kwargs.update({'metadata': {alias: value}})
                 else:
-                    kwargs["metadata"].update({alias: value})
+                    kwargs['metadata'].update({alias: value})
     return attr.ib(*args, **kwargs)
 
 
 class ModelMeta(type):
-    def __new__(mcls, name, bases, attrs):
+
+    def __new__(cls, name, bases, attrs):
         if bases:
             for k, f in attrs.items():
-                annotations = attrs.get("__annotations__", {})
+                annotations = attrs.get('__annotations__', {})
                 _implement_converter(f, k, annotations)
                 _implement_validators(f, k, annotations)
-        return attr.s(super().__new__(mcls, name, bases, attrs))
+        return attr.s(super().__new__(cls, name, bases, attrs))
 
 
 def _implement_converter(field, key, annotations):
-    if hasattr(field, "type") and field.type:
+    if hasattr(field, 'type') and field.type:
         _converter(field.type, field)
     elif key in annotations:
         _converter(annotations.get(key), field)
@@ -64,7 +65,7 @@ def _converter_model_meta(type_, field):
 
 
 def _implement_validators(field, key, annotations):
-    if hasattr(field, "type") and field.type:
+    if hasattr(field, 'type') and field.type:
         _implement_validator(field.type, field)
     elif key in annotations:
         _implement_validator(annotations.get(key), field)
@@ -75,22 +76,23 @@ def _implement_validator(type_, field):
     if type_ == str:
         validator = None
         if (
-            "min_length" in field.metadata
-            and "max_length" not in field.metadata
+            'min_length' in field.metadata
+            and 'max_length' not in field.metadata
         ):
             validator = min_str_len
         elif (
-            "max_length" in field.metadata
-            and "min_length" not in field.metadata
+            'max_length' in field.metadata
+            and 'min_length' not in field.metadata
         ):
             validator = max_str_len
-        elif "min_length" in field.metadata and "max_length" in field.metadata:
+        elif 'min_length' in field.metadata and 'max_length' in field.metadata:
             validator = min_max_str_len
         if validator is not None:
             field.validator(validator)
         # TODO implement patterns
         # TODO implement format
-    # TODO number (minimum, maximum, exclusive_minimum, exclusive_maximum, multiple_of)
+    # TODO number
+    #   (minimum, maximum, exclusive_minimum, exclusive_maximum, multiple_of)
     # TODO array (one_of, min_items, max_items, unique_items)
     # TODO object (min_properties, max_properties)
 
@@ -193,7 +195,7 @@ def description(text):
     return inner
 
 
-def consumes(*args, content_type=None, location="query", required=False):
+def consumes(*args, content_type=None, location='query', required=False):
     def inner(func):
         if args:
             for arg in args:
@@ -227,9 +229,9 @@ def tag(name):
 def response(code, description=None, examples=None, model=None):
     def inner(func):
         route_specs[func].responses[code] = {
-            "description": description,
-            "example": examples,
-            "model": model,
+            'description': description,
+            'example': examples,
+            'model': model,
         }
         return func
 
