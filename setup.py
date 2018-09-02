@@ -1,4 +1,5 @@
 import os
+
 from setuptools import setup
 
 here = os.path.abspath(os.path.dirname(__file__))
@@ -24,7 +25,7 @@ setup(
     author='Channel Cat',
     author_email='channelcat@gmail.com',
     maintainer='Richard Kuesters',
-    maintainer_email="rkuesters@gmail.com",
+    maintainer_email='rkuesters@gmail.com',
     description='OpenAPI / Swagger support for Sanic using attrs',
     long_description=README,
     long_description_content_type='text/markdown',

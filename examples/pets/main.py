@@ -1,5 +1,4 @@
 from sanic import Sanic
-
 from sanic_attrs import (
     doc,
     openapi_blueprint,
