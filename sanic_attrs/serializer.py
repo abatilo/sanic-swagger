@@ -68,12 +68,16 @@ def _raise_simple_type(simple_type, *encouraged_type):
 def _merge_metadata(data, field, model):
     if data.get("type", None) is None:
         return data
+
+    for key in metadata_aliases["all"]:
+        if key in field.metadata:
+            data[_camel_case(key)] = field.metadata.get(key)
+
     if data["type"] in metadata_aliases:
-        for key in metadata_aliases[data["type"]] + metadata_aliases["all"]:
-            if key in data:
-                continue
+        for key in metadata_aliases[data["type"]]:
             if key in field.metadata:
-                data[_camel_case(key)] = field.metadata.get(key, None)
+                data[_camel_case(key)] = field.metadata.get(key)
+
     if data.get("required", False):
         del data["required"]
         if model is not None:
@@ -157,7 +161,7 @@ def _serialize_model_meta(type_, model):
 @_serialize_type.register(type)
 def _serialize_type_type(type_, model):
     if type_ == int:
-        return {"type": "integer", "format": "int64"}
+        return {"type": "number", "format": "int64"}
     elif type_ == float:
         return {"type": "number", "format": "double"}
     elif type_ == str:
