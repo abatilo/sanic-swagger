@@ -1,11 +1,13 @@
 FROM python:3.6
+MAINTAINER Aaron AaronBatilo@gmail.com
 
 ADD . /code
 WORKDIR /code
 
-RUN pip3 install --upgrade pip
-RUN pip3 install -r /code/dev-requirements.txt
-RUN pip3 install -e .
+COPY ./Pipfile .
+COPY ./Pipfile.lock .
+RUN pip install pipenv
+RUN pipenv install --system --deploy
 
 EXPOSE 8000
 

@@ -1,0 +1,18 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+aiofiles = "==0.4.0"
+httptools = "==0.0.11"
+sanic-openapi = "==0.4.0"
+ujson = "==1.35"
+uvloop = "==0.11.2"
+websockets = "==6.0"
+Sanic = "==0.7.0"
+
+[dev-packages]
+
+[requires]
+python_version = "3.6.5"
