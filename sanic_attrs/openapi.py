@@ -7,7 +7,7 @@ from sanic.response import json
 from sanic.views import CompositionView
 
 from .doc import RouteSpec, route_specs
-from .serializer import components, serialize
+from .serializer import object_definitions, serialize
 
 blueprint = Blueprint('openapi', url_prefix='openapi')
 
@@ -216,7 +216,7 @@ def build_spec(app, loop):
     _spec['definitions'].update(
         {
             str(key.__name__): definition
-            for key, definition in components.items()
+            for key, definition in object_definitions.items()
         }
     )
 

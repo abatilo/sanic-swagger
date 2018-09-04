@@ -2,6 +2,10 @@ import os
 
 from sanic.blueprints import Blueprint
 
+"""
+Adds the /swagger endpoint to the application.
+"""
+
 dir_path = os.path.dirname(os.path.realpath(__file__))
 dir_path = os.path.abspath(dir_path + '/ui')
 

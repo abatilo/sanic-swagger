@@ -20,7 +20,7 @@ from .doc import ModelMeta
 from .options import metadata_aliases
 
 required_fields = {}
-components = {}
+object_definitions = {}
 
 
 def serialize(field, model=None):
@@ -32,12 +32,12 @@ def serialize(field, model=None):
         return _serialize_type(field, model)
 
 
-def _generate_component(func):
+def _create_definition(func):
     def wrapper(type_, model):
         # if model is None:
         #     return func(type_, model)
         output = func(type_, model)
-        components[type_] = output
+        object_definitions[type_] = output
         return {
             'type': output.get('type'),
             'format': output.get('format', None),
@@ -53,7 +53,7 @@ def _camel_case(snake_str):
     return ''.join([first.lower(), *map(str.title, others)])
 
 
-def _raise_simple_type(simple_type, *encouraged_type):
+def _raise_other_encouraged_type_exception(simple_type, *encouraged_type):
     if len(encouraged_type) > 1:
         encouraged = ', '.join([str(t.__name__) for t in encouraged_type])
     else:
@@ -106,8 +106,13 @@ def _serialize_type(type_, model):
 
 
 @_serialize_type.register(EnumMeta)  # for enums
-@_generate_component
+@_create_definition
 def _serialize_enum_meta(type_, model):
+    """
+    Note: Remember that this function is decorated with _create_definition.
+          So its outputs when calling this function are those of the wrapped
+          output.
+    """
     choices = [e.value for e in type_]
     output = _serialize_type(type(choices[0]), model)
     output.update({'enum': choices})
@@ -139,7 +144,14 @@ def _serialize_generic_meta(type_, model):
         raise TypeError('This type is not supported')
 
 
-def _serialize_model(type_, model):
+@_serialize_type.register(ModelMeta)  # for recursive types
+@_create_definition
+def _serialize_custom_objects(type_, model):
+    """
+    Note: Remember that this function is decorated with _create_definition.
+          So its outputs when calling this function are those of the wrapped
+          output.
+    """
     output = {
         'type': 'object',
         'properties': {
@@ -152,16 +164,10 @@ def _serialize_model(type_, model):
     return output
 
 
-@_serialize_type.register(ModelMeta)  # for recursive types
-@_generate_component
-def _serialize_model_meta(type_, model):
-    return _serialize_model(type_, model)
-
-
 @_serialize_type.register(type)
-def _serialize_type_type(type_, model):
+def _serialize_raw_type_information(type_, model):
     if type_ == int:
-        return {'type': 'number', 'format': 'int64'}
+        return {'type': 'integer', 'format': 'int64'}
     elif type_ == float:
         return {'type': 'number', 'format': 'double'}
     elif type_ == str:
@@ -175,10 +181,11 @@ def _serialize_type_type(type_, model):
     elif type_ == bytes:
         return {'type': 'string', 'format': 'byte'}
     elif type_ in (list, set, tuple):
-        _raise_simple_type(type_, Collection, Iterable, List, Sequence, Set)
+        _raise_other_encouraged_type_exception(type_, Collection, Iterable,
+                                               List, Sequence, Set)
     elif type_ == dict:
-        _raise_simple_type(type_, Dict, Mapping)
+        _raise_other_encouraged_type_exception(type_, Dict, Mapping)
     else:
         if attr.has(type_):  # for recursive types, just like ModelMeta
-            return _generate_component(_serialize_model)(type_, model)
+            return _create_definition(_serialize_custom_objects)(type_, model)
         raise TypeError('This type is not supported')
