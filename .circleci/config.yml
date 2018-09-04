@@ -29,6 +29,7 @@ jobs:
       - run: pipenv install --dev
       - run: pipenv run pytest --cov-report html --junit-xml=coverage.xml --cov-branch --cov-fail-under=90 -v --cov=sanic_attrs tests/
       - run: mkdir -p test-results/pytest && cp coverage.xml test-results/pytest/results.xml
+      - run: pipenv run codecov -t $CODECOV_TOKEN
 
       - store_artifacts:
           path: htmlcov
