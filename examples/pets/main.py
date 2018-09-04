@@ -1,8 +1,9 @@
+import cattr
 from sanic import Sanic
+from sanic.response import json
 from sanic_attrs import (
     doc,
     openapi_blueprint,
-    response,
     swagger_blueprint
 )
 
@@ -22,7 +23,7 @@ class Pet(doc.Model):
 @doc.produces(Pet)
 async def root(req):
     pet = Pet('Chopper', 3)
-    return response.model(pet)
+    return json(cattr.unstructure(pet))
 
 
 if __name__ == '__main__':
