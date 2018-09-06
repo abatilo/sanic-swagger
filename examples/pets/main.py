@@ -1,7 +1,7 @@
 import cattr
 from sanic import Sanic
 from sanic.response import json
-from sanic_attrs import (
+from sanic_swagger import (
     doc,
     openapi_blueprint,
     swagger_blueprint

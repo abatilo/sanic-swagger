@@ -1,4 +1,4 @@
-from sanic_attrs.options import metadata_aliases
+from sanic_swagger.options import metadata_aliases
 
 
 def test_that_metadata_aliases_have_not_changed():

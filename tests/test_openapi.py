@@ -6,7 +6,7 @@ from sanic import Sanic
 from sanic.blueprints import Blueprint
 from sanic.response import text
 from sanic.views import HTTPMethodView
-from sanic_attrs import (
+from sanic_swagger import (
     doc,
     openapi_blueprint
 )

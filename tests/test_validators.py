@@ -1,6 +1,6 @@
 import pytest
 import attr
-from sanic_attrs.validators import (
+from sanic_swagger.validators import (
     min_str_len,
     max_str_len,
     min_max_str_len

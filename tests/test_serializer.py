@@ -4,8 +4,8 @@ from enum import Enum
 
 import pytest
 import attr
-from sanic_attrs import doc
-from sanic_attrs import serializer
+from sanic_swagger import doc
+from sanic_swagger import serializer
 
 
 def test_serialize_any():
