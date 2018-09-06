@@ -1,6 +1,7 @@
 # sanic-swagger
 
 [![CircleCI](https://circleci.com/gh/abatilo/sanic-swagger.svg?style=svg)](https://circleci.com/gh/abatilo/sanic-swagger)
+[![codecov](https://codecov.io/gh/abatilo/sanic-swagger/branch/master/graph/badge.svg)](https://codecov.io/gh/abatilo/sanic-swagger)
 
 Annotate your [Sanic](https://github.com/channelcat/sanic) endpoints, and
 automatically generate a
