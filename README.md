@@ -2,6 +2,9 @@
 
 [![CircleCI](https://circleci.com/gh/abatilo/sanic-swagger.svg?style=svg)](https://circleci.com/gh/abatilo/sanic-swagger)
 [![codecov](https://codecov.io/gh/abatilo/sanic-swagger/branch/master/graph/badge.svg)](https://codecov.io/gh/abatilo/sanic-swagger)
+[![PyPI status](https://img.shields.io/pypi/status/sanic-swagger.svg)](https://pypi.python.org/pypi/sanic-swagger/)
+[![PyPI version](https://badge.fury.io/py/sanic-swagger.svg)](https://badge.fury.io/py/sanic-swagger)
+[![PyPI pyversions](https://img.shields.io/pypi/pyversions/sanic-swagger.svg)](https://pypi.python.org/pypi/sanic-swagger/)
 
 Annotate your [Sanic](https://github.com/channelcat/sanic) endpoints, and
 automatically generate a

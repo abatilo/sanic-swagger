@@ -1,10 +1,13 @@
 import os
+import sys
 
 from setuptools import setup
+from setuptools.command.install import install
 
 here = os.path.abspath(os.path.dirname(__file__))
 
-about = {'version': '0.0.1'}
+VERSION = '0.0.1'
+about = {'version': VERSION}
 
 with open(
     os.path.join(here, 'sanic_swagger', '__init__.py'), 'r', encoding='utf-8'
@@ -15,6 +18,21 @@ with open(
 
 with open(os.path.join(here, 'README.md'), 'r', encoding='utf-8') as f:
     README = f.read()
+
+
+class VerifyVersionCommand(install):
+    """Custom command to verify that the git tag matches our version"""
+    description = 'verify that the git tag matches our version'
+
+    def run(self):
+        tag = os.getenv('CIRCLE_TAG')
+
+        if tag != VERSION:
+            info = ('Git tag: {0} does not match '
+                    'the version of this app: {1}').format(
+                tag, VERSION
+            )
+            sys.exit(info)
 
 
 setup(
@@ -46,4 +64,9 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
     ],
+    keywords='sanic swagger openapi attrs cattrs',
+    python_requires='>=3.5',
+    cmdclass={
+        'verify': VerifyVersionCommand,
+    }
 )

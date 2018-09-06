@@ -37,6 +37,36 @@ jobs:
       - store_test_results:
           path: test-results
 
+  deploy:
+    docker:
+      - image: python:3.6
+    working_directory: ~/sanic-swagger
+    steps:
+      - checkout
+      - run: pip install pipenv
+      - run: pipenv install --dev
+      - run:
+          name: Verify git tag vs. version
+          command: |
+            echo "CIRCLE_TAG=$(git tag -l --points-at HEAD)" > .env
+            cat .env
+            pipenv run python setup.py verify
+      - run:
+          name: Init .pypirc
+          command: |
+            echo -e "[pypi]" >> ~/.pypirc
+            echo -e "username = abatilo" >> ~/.pypirc
+            echo -e "password = $PYPI_PASSWORD" >> ~/.pypirc
+      - run:
+          name: Create packages
+          command: |
+            pipenv run python setup.py sdist
+            pipenv run python setup.py bdist_wheel
+      - run:
+          name: Upload packages
+          command: |
+            pipenv run twine upload dist/*
+
 workflows:
   version: 2
   build:
@@ -44,3 +74,14 @@ workflows:
       - lint_git_commits
       - lint
       - test
+      - deploy:
+          requires:
+            - lint_git_commits
+            - lint
+            - test
+          filters:
+            branches:
+              only:
+                - master
+            tags:
+              only: /[0-9]+(\.[0-9]+)*/
