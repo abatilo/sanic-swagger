@@ -6,6 +6,7 @@
 [![PyPI status](https://img.shields.io/pypi/status/sanic-swagger.svg)](https://pypi.python.org/pypi/sanic-swagger/)
 [![PyPI version](https://badge.fury.io/py/sanic-swagger.svg)](https://badge.fury.io/py/sanic-swagger)
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/sanic-swagger.svg)](https://pypi.python.org/pypi/sanic-swagger/)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fabatilo%2Fsanic-swagger.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fabatilo%2Fsanic-swagger?ref=badge_shield)
 
 Annotate your [Sanic](https://github.com/channelcat/sanic) endpoints, and
 automatically generate a
@@ -20,3 +21,7 @@ As such, you can write all of your models as
 [attrs](https://github.com/python-attrs/attrs) which gives you the handy
 ability to use [cattrs](https://github.com/Tinche/cattrs) for dealing with your
 serialization and deserialization of your models to and from JSON.
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fabatilo%2Fsanic-swagger.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fabatilo%2Fsanic-swagger?ref=badge_large)
