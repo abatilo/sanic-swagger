@@ -1,5 +1,6 @@
 # sanic-swagger
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/8e7b064677ab4b6cbc2508b626bcba0a)](https://app.codacy.com/app/abatilo/sanic-swagger?utm_source=github.com&utm_medium=referral&utm_content=abatilo/sanic-swagger&utm_campaign=Badge_Grade_Settings)
 [![CircleCI](https://circleci.com/gh/abatilo/sanic-swagger.svg?style=svg)](https://circleci.com/gh/abatilo/sanic-swagger)
 [![codecov](https://codecov.io/gh/abatilo/sanic-swagger/branch/master/graph/badge.svg)](https://codecov.io/gh/abatilo/sanic-swagger)
 [![PyPI status](https://img.shields.io/pypi/status/sanic-swagger.svg)](https://pypi.python.org/pypi/sanic-swagger/)
