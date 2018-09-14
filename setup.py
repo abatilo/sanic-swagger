@@ -6,7 +6,7 @@ from setuptools.command.install import install
 
 here = os.path.abspath(os.path.dirname(__file__))
 
-VERSION = '0.0.2'
+VERSION = '0.0.3'
 about = {'version': VERSION}
 
 with open(
@@ -60,12 +60,10 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Environment :: Web Environment',
         'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
     ],
     keywords='sanic swagger openapi attrs cattrs',
-    python_requires='>=3.5',
+    python_requires='==3.6.*',
     cmdclass={
         'verify': VerifyVersionCommand,
     }
