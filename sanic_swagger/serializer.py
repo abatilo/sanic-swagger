@@ -1,4 +1,3 @@
-import sys
 from datetime import date, datetime
 from enum import EnumMeta
 from functools import singledispatch
@@ -6,6 +5,7 @@ from typing import (
     Any,
     Collection,
     Dict,
+    GenericMeta,
     Iterable,
     List,
     Mapping,
@@ -18,12 +18,6 @@ import attr
 
 from .doc import ModelMeta
 from .options import metadata_aliases
-
-# Check if we are running on Python 3.7
-if sys.version_info[:3] >= (3, 7, 0):
-    GenericMeta = type
-else:
-    from typing import GenericMeta  # noqa
 
 required_fields = {}
 object_definitions = {}
