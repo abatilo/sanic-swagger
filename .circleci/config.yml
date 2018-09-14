@@ -29,13 +29,23 @@ jobs:
       - run: pipenv install --dev
       - run: pipenv run pytest --cov-report html --cov-report xml:codecov.xml --junit-xml=coverage.xml --cov-branch --cov-fail-under=90 -v --cov=sanic_swagger tests/
       - run: mkdir -p test-results/pytest && cp coverage.xml test-results/pytest/results.xml
-      - run: pipenv run codecov -t $CODECOV_TOKEN
 
       - store_artifacts:
           path: htmlcov
 
       - store_test_results:
           path: test-results
+
+  upload_coverage:
+    docker:
+      - image: python:3.6
+    working_directory: ~/sanic-swagger
+    steps:
+      - checkout
+      - run: pip install pipenv
+      - run: pipenv install --dev
+      - run: pipenv run pytest --cov-report html --cov-report xml:codecov.xml --junit-xml=coverage.xml --cov-branch --cov-fail-under=90 -v --cov=sanic_swagger tests/
+      - run: pipenv run codecov -t $CODECOV_TOKEN
 
   deploy:
     docker:
@@ -74,6 +84,10 @@ workflows:
       - lint_git_commits
       - lint
       - test
+      - upload_coverage:
+          filters:
+            branches:
+              only: master
       - deploy:
           requires:
             - lint_git_commits
